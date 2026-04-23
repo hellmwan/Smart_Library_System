@@ -10,90 +10,117 @@ public class RegisterFrame extends JFrame {
     private JPasswordField passwordField;
     private JButton registerButton;
     private JButton backButton;
+    private Image backgroundImage;
 
     public RegisterFrame() {
-        // Set up the main window properties
+        // Set the window properties
         setTitle("Smart Library - Sign Up");
-        setSize(400, 550);
+        setSize(400, 600); // Consistent height with LoginFrame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // Center the window on the screen
-        setLayout(null); // Use absolute positioning for custom layout
+        setLocationRelativeTo(null);
 
-        // Apply a white background for a modern look
-        getContentPane().setBackground(Color.WHITE);
+        // --- LOAD THE BACKGROUND IMAGE ---
+        backgroundImage = new ImageIcon("src/background.png").getImage();
 
-        // Initialize and place all UI components
+        // --- CREATE A CUSTOM PANEL WITH OPACITY CONTROL ---
+        JPanel backgroundPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+
+                // Create a copy of the graphics object to avoid affecting components
+                Graphics2D g2d = (Graphics2D) g.create();
+
+                // ---> MANUAL OPACITY SETTING (0.0f to 1.0f) <---
+                // Change 0.4f to adjust the background transparency manually
+                float opacity = 0.75f;
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+
+                if (backgroundImage != null) {
+                    g2d.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+                }
+
+                // Dispose the copy so buttons and text stay 100% opaque (solid)
+                g2d.dispose();
+            }
+        };
+        backgroundPanel.setLayout(null);
+        setContentPane(backgroundPanel);
+
         buildUI();
     }
 
     private void buildUI() {
-        // Main Title Label
-        JLabel titleLabel = new JLabel("Create Account");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        titleLabel.setBounds(100, 30, 200, 40);
-        add(titleLabel);
-
-        // 1. Full Name Input Section
+        // --- 1. FULL NAME SECTION ---
         JLabel nameLabel = new JLabel("Full Name");
-        nameLabel.setBounds(50, 100, 100, 20);
+        nameLabel.setBounds(50, 80, 300, 20);
+        nameLabel.setForeground(Color.BLACK); // Manual Color Setting
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
         add(nameLabel);
 
         nameField = new JTextField();
-        nameField.setBounds(50, 120, 300, 40);
+        nameField.setBounds(50, 100, 300, 30);
+        nameField.setOpaque(false);
+        nameField.setForeground(Color.BLACK);
+        // Manual border thickness setting (3 pixels)
+        nameField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
         add(nameField);
 
-        // 2. Student ID Section (Functions as the username)
+        // --- 2. STUDENT ID SECTION ---
         JLabel idLabel = new JLabel("Student ID / Username");
-        idLabel.setBounds(50, 180, 150, 20);
+        idLabel.setBounds(50, 160, 300, 20);
+        idLabel.setForeground(Color.BLACK);
+        idLabel.setFont(new Font("Arial", Font.BOLD, 14));
         add(idLabel);
 
         studentIdField = new JTextField();
-        studentIdField.setBounds(50, 200, 300, 40);
+        studentIdField.setBounds(50, 180, 300, 30);
+        studentIdField.setOpaque(false);
+        studentIdField.setForeground(Color.BLACK);
+        studentIdField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
         add(studentIdField);
 
-        // 3. Password Input Section
+        // --- 3. PASSWORD SECTION ---
         JLabel passLabel = new JLabel("Password");
-        passLabel.setBounds(50, 260, 100, 20);
+        passLabel.setBounds(50, 240, 300, 20);
+        passLabel.setForeground(Color.BLACK);
+        passLabel.setFont(new Font("Arial", Font.BOLD, 14));
         add(passLabel);
 
         passwordField = new JPasswordField();
-        passwordField.setBounds(50, 280, 300, 40);
+        passwordField.setBounds(50, 260, 300, 30);
+        passwordField.setOpaque(false);
+        passwordField.setForeground(Color.BLACK);
+        passwordField.setBorder(BorderFactory.createMatteBorder(0, 0, 3, 0, Color.BLACK));
         add(passwordField);
 
-        // 4. Registration Button Configuration
+        // --- 4. SIGN UP BUTTON ---
         registerButton = new JButton("SIGN UP");
-        registerButton.setBounds(50, 360, 300, 45);
-        registerButton.setBackground(new Color(46, 204, 113)); // Modern green color
+        registerButton.setBounds(50, 340, 300, 45);
+        registerButton.setBackground(new Color(46, 204, 113)); // Modern Green
         registerButton.setForeground(Color.WHITE);
         registerButton.setFont(new Font("Arial", Font.BOLD, 14));
         registerButton.setFocusPainted(false);
         add(registerButton);
 
-        // 5. Back to Login Button (Styled as a hyperlink)
+        // --- 5. BACK TO LOGIN BUTTON ---
         backButton = new JButton("Back to Login");
-        backButton.setBounds(100, 420, 200, 30);
-        backButton.setContentAreaFilled(false); // Make the background transparent
-        backButton.setBorderPainted(false); // Remove borders to simulate a link
-        backButton.setForeground(new Color(52, 152, 219));
+        backButton.setBounds(50, 400, 300, 30);
+        backButton.setContentAreaFilled(false);
+        backButton.setBorderPainted(false);
+        backButton.setForeground(new Color(52, 152, 219)); // Professional Blue
         backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         add(backButton);
 
         // --- EVENT LISTENERS ---
-
-        // Handle navigation back to the login screen
         backButton.addActionListener(e -> {
-            LoginFrame login = new LoginFrame();
-            login.setVisible(true);
-            this.dispose(); // Close the current registration frame
+            new LoginFrame().setVisible(true);
+            this.dispose();
         });
 
-        // Handle the sign-up process
         registerButton.addActionListener(e -> {
-            // TODO: Database insertion logic will be implemented here (Data Layer)
-            JOptionPane.showMessageDialog(this, "Registration Successful! Please log in.");
-
-            LoginFrame login = new LoginFrame();
-            login.setVisible(true);
+            JOptionPane.showMessageDialog(this, "Registration Successful! Please login.");
+            new LoginFrame().setVisible(true);
             this.dispose();
         });
     }

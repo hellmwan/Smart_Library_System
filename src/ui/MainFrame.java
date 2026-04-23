@@ -2,98 +2,149 @@ package ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainFrame extends JFrame {
 
+    private CardLayout cardLayout;
+    private JPanel mainContentPanel;
+
+    // Menü butonlarını takip etmek için bir liste
+    private List<JButton> menuButtons = new ArrayList<>();
+
     public MainFrame() {
-        // Set the title of the dashboard window
-        setTitle("Smart Library - Dashboard");
-
-        // Set the width and height of the window
-        setSize(800, 600);
-
-        // Close the application when clicking the exit button
+        // Basic window setup
+        setTitle("Smart Library - Admin Dashboard");
+        setSize(1000, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // Center the dashboard on the screen
         setLocationRelativeTo(null);
 
-        // Use a 2x2 grid layout with 20 pixels of space between the buttons
-        setLayout(new GridLayout(2, 2, 20, 20));
+        // Using BorderLayout for the main structure
+        setLayout(new BorderLayout());
 
-        // Set the background color to white
-        getContentPane().setBackground(Color.WHITE);
+        // --- 1. SIDEBAR SETUP (YENİ KOYU ZEYTİN YEŞİLİ: #556b2f) ---
+        JPanel sidebar = new JPanel();
+        sidebar.setPreferredSize(new Dimension(250, getHeight()));
 
-        // Add 50 pixels of padding around the main content area
-        getRootPane().setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
+        // Menünün arka plan rengi güncellendi
+        sidebar.setBackground(Color.decode("#556b2f"));
+        sidebar.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 15));
 
-        // 1. Red Button: Manage Books section
-        JButton btnBooks = createMenuButton("Manage Books", "#e74c3c");
-        btnBooks.addActionListener(e -> {
-            // Open the Manage Books screen
-            ManageBooksFrame booksFrame = new ManageBooksFrame();
-            booksFrame.setVisible(true);
+        JLabel menuTitle = new JLabel("SMART LIBRARY");
+        menuTitle.setFont(new Font("Arial", Font.BOLD, 22));
+        // Koyu arka plan üzerinde okunabilmesi için başlık Beyaz yapıldı
+        menuTitle.setForeground(Color.WHITE);
+        menuTitle.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        sidebar.add(menuTitle);
 
-            // Close the main dashboard
-            this.dispose();
-        });
+        // Define Navigation Buttons
+        JButton btnHome = createMenuButton("🏠 Overview");
+        JButton btnBooks = createMenuButton("📚 Manage Books");
+        JButton btnMembers = createMenuButton("👥 Manage Members");
+        JButton btnLoans = createMenuButton("🔄 Issue / Return");
+        JButton btnReports = createMenuButton("📊 Reports");
 
-        // 2. Green Button: Manage Members section
-        JButton btnMembers = createMenuButton("Manage Members", "#2ecc71");
-        btnMembers.addActionListener(e -> {
-            // Open the Manage Members screen
-            ManageMembersFrame membersFrame = new ManageMembersFrame();
-            membersFrame.setVisible(true);
-            this.dispose();
-        });
+        sidebar.add(btnHome);
+        sidebar.add(btnBooks);
+        sidebar.add(btnMembers);
+        sidebar.add(btnLoans);
+        sidebar.add(btnReports);
 
-        // 3. Yellow Button: Issue / Return operations
-        JButton btnLoans = createMenuButton("Issue / Return", "#f1c40f");
-        btnLoans.addActionListener(e -> {
-            // Open the Issue and Return screen
-            IssueReturnFrame loansFrame = new IssueReturnFrame();
-            loansFrame.setVisible(true);
-            this.dispose();
-        });
+        add(sidebar, BorderLayout.WEST);
 
-        // 4. Purple Button: Penalties & Reports section (NEW LINK)
-        JButton btnReports = createMenuButton("Penalties & Reports", "#9b59b6");
-        btnReports.addActionListener(e -> {
-            // Open the Reports screen
-            ReportsFrame reportsFrame = new ReportsFrame();
-            reportsFrame.setVisible(true);
-            this.dispose();
-        });
+        // Varsayılan olarak ilk açılışta "Overview (Home)" butonunu aktif/basılı hale getir
+        setActiveButton(btnHome);
 
-        // Add all four buttons to the dashboard grid
-        add(btnBooks);
-        add(btnMembers);
-        add(btnLoans);
-        add(btnReports);
+        // --- 2. CARDLAYOUT CONTENT AREA ---
+        cardLayout = new CardLayout();
+        mainContentPanel = new JPanel(cardLayout);
+
+        mainContentPanel.add(createPlaceholderPanel("WELCOME TO SMART LIBRARY", Color.WHITE), "HOME");
+        mainContentPanel.add(new ManageBooksFrame(), "BOOKS");
+        mainContentPanel.add(new ManageMembersFrame(), "MEMBERS");
+        mainContentPanel.add(new IssueReturnFrame(), "LOANS");
+        mainContentPanel.add(new ReportsFrame(), "REPORTS");
+
+        add(mainContentPanel, BorderLayout.CENTER);
+
+        // --- 3. EVENT LISTENERS (Tıklama Olayları) ---
+        btnHome.addActionListener(e -> { switchTab("HOME"); setActiveButton(btnHome); });
+        btnBooks.addActionListener(e -> { switchTab("BOOKS"); setActiveButton(btnBooks); });
+        btnMembers.addActionListener(e -> { switchTab("MEMBERS"); setActiveButton(btnMembers); });
+        btnLoans.addActionListener(e -> { switchTab("LOANS"); setActiveButton(btnLoans); });
+        btnReports.addActionListener(e -> { switchTab("REPORTS"); setActiveButton(btnReports); });
     }
 
     /**
-     * A helper method to create and design menu buttons easily.
-     * This prevents code duplication.
+     * Tıklanan butonu krem rengi yapar (yazısını siyahlaştırır),
+     * diğerlerini orijinal zeytin yeşiline (ve beyaz yazıya) döndürür.
      */
-    private JButton createMenuButton(String text, String hexColor) {
+    private void setActiveButton(JButton activeBtn) {
+        // Önce tüm butonları orijinal haline getir
+        for (JButton btn : menuButtons) {
+            btn.setBackground(Color.decode("#556b2f"));
+            btn.setForeground(Color.WHITE); // Koyu yeşilde yazı beyaz
+        }
+        // Sadece tıklanan (aktif) butonu krem rengi yap ve yazısını okunabilirlik için SİYAH yap
+        activeBtn.setBackground(Color.decode("#ffe7ba"));
+        activeBtn.setForeground(Color.BLACK);
+    }
+
+    private void switchTab(String tabName) {
+        cardLayout.show(mainContentPanel, tabName);
+        mainContentPanel.revalidate();
+        mainContentPanel.repaint();
+    }
+
+    private JPanel createPlaceholderPanel(String text, Color bgColor) {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(bgColor);
+
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Arial", Font.BOLD, 30));
+        panel.add(label);
+
+        return panel;
+    }
+
+    private JButton createMenuButton(String text) {
         JButton btn = new JButton(text);
+        btn.setPreferredSize(new Dimension(220, 45));
+        btn.setFont(new Font("Arial", Font.BOLD, 15));
 
-        // Set the text font, style, and size
-        btn.setFont(new Font("Arial", Font.BOLD, 20));
-
-        // Set the button background color using a hex code
-        btn.setBackground(Color.decode(hexColor));
-
-        // Set the text color to white
+        // Butonların varsayılan arka planı yeni zeytin yeşili
+        btn.setBackground(Color.decode("#556b2f"));
         btn.setForeground(Color.WHITE);
-
-        // Remove the default focus border when the button is clicked
         btn.setFocusPainted(false);
-
-        // Change the mouse icon to a hand pointer when hovering over the button
+        btn.setBorderPainted(false);
+        btn.setOpaque(true);
+        btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        // Hover (Üzerine gelince hafif renk değiştirme efekti)
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                // Buton aktif (krem) değilse, üzerine gelince yeşili bir tık aç (daha belirgin hover)
+                if (!btn.getBackground().equals(Color.decode("#ffe7ba"))) {
+                    btn.setBackground(Color.decode("#6b873b"));
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                // Fare üzerinden gidince ve aktif (krem) değilse orijinal koyu yeşile dön
+                if (!btn.getBackground().equals(Color.decode("#ffe7ba"))) {
+                    btn.setBackground(Color.decode("#556b2f"));
+                }
+            }
+        });
+
+        // Oluşturulan her butonu kontrol listesine ekle
+        menuButtons.add(btn);
+
         return btn;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new MainFrame().setVisible(true));
     }
 }

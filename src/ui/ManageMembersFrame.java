@@ -4,31 +4,22 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
-public class ManageMembersFrame extends JFrame {
+// 1. CHANGED: Extends JPanel so it can be embedded inside the MainFrame
+public class ManageMembersFrame extends JPanel {
 
     private JTextField txtName, txtPhone, txtAddress;
-    private JButton btnAdd, btnUpdate, btnDelete, btnBack;
+    private JButton btnAdd, btnUpdate, btnDelete; // Removed btnBack
     private JTable memberTable;
     private DefaultTableModel tableModel;
 
     public ManageMembersFrame() {
-        // Set the title of the window
-        setTitle("Smart Library - Manage Members");
-
-        // Define the width and height of the frame
-        setSize(850, 650);
-
-        // Close the application when the exit button is clicked
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // Center the window on the screen
-        setLocationRelativeTo(null);
+        // Window settings (setTitle, setSize) are REMOVED
 
         // Use BorderLayout with 10 pixels of space between components
         setLayout(new BorderLayout(10, 10));
 
-        // Change the main background color to white
-        getContentPane().setBackground(Color.WHITE);
+        // 2. CHANGED: Use setBackground directly for panels
+        setBackground(Color.WHITE);
 
         // Call methods to create the top and center sections
         buildTopPanel();
@@ -62,19 +53,29 @@ public class ManageMembersFrame extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         buttonPanel.setBackground(Color.WHITE);
 
-        // Create the buttons for member operations
+        // Create the buttons with modern UI colors
         btnAdd = new JButton("Add Member");
+        btnAdd.setBackground(new Color(46, 204, 113)); // Green
+        btnAdd.setForeground(Color.WHITE);
+        btnAdd.setFocusPainted(false);
+
         btnUpdate = new JButton("Update");
+        btnUpdate.setBackground(new Color(52, 152, 219)); // Blue
+        btnUpdate.setForeground(Color.WHITE);
+        btnUpdate.setFocusPainted(false);
+
         btnDelete = new JButton("Delete");
-        btnBack = new JButton("← Back to Dashboard");
+        btnDelete.setBackground(new Color(231, 76, 60)); // Red
+        btnDelete.setForeground(Color.WHITE);
+        btnDelete.setFocusPainted(false);
 
         // Add action buttons to their specific panel
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnUpdate);
         buttonPanel.add(btnDelete);
 
-        // Add the back button and the button panel to the top panel
-        topPanel.add(btnBack);
+        // Add an empty label to keep the grid layout aligned properly
+        topPanel.add(new JLabel(""));
         topPanel.add(buttonPanel);
 
         // Place the top panel at the north side of the frame
@@ -101,14 +102,6 @@ public class ManageMembersFrame extends JFrame {
         // Place the table in the center area of the frame
         add(scrollPane, BorderLayout.CENTER);
 
-        // Handle the back button click event
-        btnBack.addActionListener(e -> {
-            // Open the main dashboard screen
-            MainFrame dashboard = new MainFrame();
-            dashboard.setVisible(true);
-
-            // Close the current window
-            this.dispose();
-        });
+        // NOTE: The Back button logic was removed from here
     }
 }

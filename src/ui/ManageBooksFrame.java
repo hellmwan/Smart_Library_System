@@ -4,32 +4,24 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
-public class ManageBooksFrame extends JFrame {
+// 1. CHANGED: Now it extends JPanel instead of JFrame!
+public class ManageBooksFrame extends JPanel {
 
     // UI components for the screen
     private JTextField txtTitle, txtAuthor, txtIsbn;
-    private JButton btnAdd, btnUpdate, btnDelete, btnBack;
+    private JButton btnAdd, btnUpdate, btnDelete; // Removed the btnBack
     private JTable bookTable;
     private DefaultTableModel tableModel;
 
     public ManageBooksFrame() {
-        // Set the window title
-        setTitle("Smart Library - Manage Books");
-
-        // Define the width and height of the frame
-        setSize(850, 650);
-
-        // Close the application when clicking the exit button
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // Center the window on the screen
-        setLocationRelativeTo(null);
+        // Window settings like setSize() and setTitle() are REMOVED
+        // because this is now a panel inside the MainFrame.
 
         // Divide the screen into North, South, and Center areas with 10px gaps
         setLayout(new BorderLayout(10, 10));
 
-        // Set the main background color to white
-        getContentPane().setBackground(Color.WHITE);
+        // 2. CHANGED: Use setBackground directly instead of getContentPane()
+        setBackground(Color.WHITE);
 
         // Call methods to build the interface
         buildTopPanel();    // Top panel for input fields
@@ -62,19 +54,29 @@ public class ManageBooksFrame extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         buttonPanel.setBackground(Color.WHITE);
 
-        // Create buttons for managing books
+        // Create buttons for managing books with modern colors
         btnAdd = new JButton("Add Book");
+        btnAdd.setBackground(new Color(46, 204, 113)); // Green
+        btnAdd.setForeground(Color.WHITE);
+        btnAdd.setFocusPainted(false);
+
         btnUpdate = new JButton("Update");
+        btnUpdate.setBackground(new Color(52, 152, 219)); // Blue
+        btnUpdate.setForeground(Color.WHITE);
+        btnUpdate.setFocusPainted(false);
+
         btnDelete = new JButton("Delete");
-        btnBack = new JButton("← Back to Dashboard");
+        btnDelete.setBackground(new Color(231, 76, 60)); // Red
+        btnDelete.setForeground(Color.WHITE);
+        btnDelete.setFocusPainted(false);
 
         // Add action buttons to the sub-panel
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnUpdate);
         buttonPanel.add(btnDelete);
 
-        // Add the back button and the sub-panel to the top panel
-        topPanel.add(btnBack);
+        // Add an empty label to keep the grid layout aligned
+        topPanel.add(new JLabel(""));
         topPanel.add(buttonPanel);
 
         // Add this top panel to the North (top) area of the screen
@@ -101,18 +103,6 @@ public class ManageBooksFrame extends JFrame {
         // Add the scrollable pane to the Center area of the screen
         add(scrollPane, BorderLayout.CENTER);
 
-        // Return to the Main Menu when the back button is clicked
-        btnBack.addActionListener(e -> {
-            MainFrame dashboard = new MainFrame();
-            dashboard.setVisible(true);
-
-            // Close the current window
-            this.dispose();
-        });
-    }
-
-    public static void main(String[] args) {
-        // Start the application and show the frame
-        new ManageBooksFrame().setVisible(true);
+        // NOTE: The "Back" button logic is removed because the MainFrame sidebar handles navigation!
     }
 }

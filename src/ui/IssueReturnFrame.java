@@ -4,32 +4,23 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
-public class IssueReturnFrame extends JFrame {
+// 1. CHANGED: Extends JPanel to fit inside the MainFrame CardLayout
+public class IssueReturnFrame extends JPanel {
 
     private JComboBox<String> cmbMembers;
     private JComboBox<String> cmbBooks;
-    private JButton btnIssue, btnReturn, btnBack;
+    private JButton btnIssue, btnReturn; // btnBack is removed
     private JTable loanTable;
     private DefaultTableModel tableModel;
 
     public IssueReturnFrame() {
-        // Set the window title
-        setTitle("Smart Library - Issue & Return");
-
-        // Define the size of the frame
-        setSize(850, 650);
-
-        // Close the application when clicking the 'X' icon
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // Center the window on the screen
-        setLocationRelativeTo(null);
+        // Window settings (setSize, setTitle, etc.) are REMOVED
 
         // Use BorderLayout with 10px horizontal and vertical gaps
         setLayout(new BorderLayout(10, 10));
 
-        // Set the main background color to white
-        getContentPane().setBackground(Color.WHITE);
+        // 2. CHANGED: Use setBackground directly for the panel
+        setBackground(Color.WHITE);
 
         // Call methods to build different parts of the UI
         buildTopPanel();
@@ -65,29 +56,26 @@ public class IssueReturnFrame extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         buttonPanel.setBackground(Color.WHITE);
 
-        // Create functional buttons
+        // Create functional buttons with modern colors
         btnIssue = new JButton("Issue Book (Ödünç Ver)");
+        btnIssue.setBackground(new Color(52, 152, 219)); // Blue color for issuing
+        btnIssue.setForeground(Color.WHITE);
+        btnIssue.setFocusPainted(false);
+
         btnReturn = new JButton("Return Book (İade Al)");
-        btnBack = new JButton("← Back to Dashboard");
+        btnReturn.setBackground(new Color(230, 126, 34)); // Orange color for returning
+        btnReturn.setForeground(Color.WHITE);
+        btnReturn.setFocusPainted(false);
 
         buttonPanel.add(btnIssue);
         buttonPanel.add(btnReturn);
 
-        topPanel.add(btnBack);
+        // Add an empty label to keep the grid aligned properly
+        topPanel.add(new JLabel(""));
         topPanel.add(buttonPanel);
 
         // Place the top panel at the north side of the main frame
         add(topPanel, BorderLayout.NORTH);
-
-        // Handle the back button click event
-        btnBack.addActionListener(e -> {
-            // Return to the main dashboard
-            MainFrame dashboard = new MainFrame();
-            dashboard.setVisible(true);
-
-            // Close the current window
-            this.dispose();
-        });
     }
 
     private void buildCenterPanel() {
@@ -108,5 +96,7 @@ public class IssueReturnFrame extends JFrame {
 
         // Place the table in the center of the main frame
         add(scrollPane, BorderLayout.CENTER);
+
+        // NOTE: The Back button logic was completely removed from here.
     }
 }

@@ -4,30 +4,21 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
-public class ReportsFrame extends JFrame {
+// 1. CHANGED: Extends JPanel so it can be shown inside the MainFrame
+public class ReportsFrame extends JPanel {
 
     private JTable reportTable;
     private DefaultTableModel tableModel;
-    private JButton btnBack;
+    // btnBack is completely removed
 
     public ReportsFrame() {
-        // Set the window title
-        setTitle("Smart Library - Penalties & Reports");
-
-        // Define the width and height of the window
-        setSize(850, 650);
-
-        // Close the application when the exit button is clicked
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // Center the window on the screen
-        setLocationRelativeTo(null);
+        // Window settings (setTitle, setSize, etc.) are REMOVED
 
         // Use BorderLayout with 10 pixels of gap between components
         setLayout(new BorderLayout(10, 10));
 
-        // Change the main background color to white
-        getContentPane().setBackground(Color.WHITE);
+        // 2. CHANGED: Use setBackground directly for the panel
+        setBackground(Color.WHITE);
 
         // Call methods to build the top and center panels
         buildTopPanel();
@@ -35,35 +26,25 @@ public class ReportsFrame extends JFrame {
     }
 
     private void buildTopPanel() {
-        // Create the top panel and use BorderLayout for it
-        JPanel topPanel = new JPanel(new BorderLayout());
+        // Create the top panel and use FlowLayout to align the title to the left
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         // Add empty space (padding) around the panel edges
-        topPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+        topPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 0, 50));
         topPanel.setBackground(Color.WHITE);
 
         // Create an eye-catching, red title for the report
         JLabel titleLabel = new JLabel("Overdue Books & Penalties Report");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(Color.decode("#c0392b")); // Dark red color
 
-        // Create the back button and add its action
-        btnBack = new JButton("← Back to Dashboard");
-        btnBack.addActionListener(e -> {
-            // Open the main dashboard screen
-            MainFrame dashboard = new MainFrame();
-            dashboard.setVisible(true);
-
-            // Close the current reports window
-            this.dispose();
-        });
-
-        // Place the title on the left (WEST) and the back button on the right (EAST)
-        topPanel.add(titleLabel, BorderLayout.WEST);
-        topPanel.add(btnBack, BorderLayout.EAST);
+        // Add the title to the top panel
+        topPanel.add(titleLabel);
 
         // Add this top panel to the top (NORTH) area of the main screen
         add(topPanel, BorderLayout.NORTH);
+
+        // NOTE: The back button was removed from here.
     }
 
     private void buildCenterPanel() {
@@ -88,7 +69,7 @@ public class ReportsFrame extends JFrame {
 
         // Put the table inside a scrollable pane
         JScrollPane scrollPane = new JScrollPane(reportTable);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 20, 20, 20));
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(20, 50, 50, 50)); // Adjusted padding to look better
         scrollPane.getViewport().setBackground(Color.WHITE);
 
         // Add the scrollable table to the center of the main screen

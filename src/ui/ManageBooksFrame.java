@@ -138,6 +138,36 @@ public class ManageBooksFrame extends JFrame {
             }
 
         });
+        //Handle Update button click event
+        //Updates selected book information in database and refreshes the table
+        btnUpdate.addActionListener(e->{
+
+            //Get selected row from table
+            int selectedRow=bookTable.getSelectedRow();
+            //Check if no row is selected
+            if(selectedRow==-1){
+                JOptionPane.showMessageDialog(this,"Please select a book to update");
+                return;
+            }
+            //Convert view index to model index (important for correct row)
+            int modelRow=bookTable.convertRowIndexToModel(selectedRow);
+            //Get book ID from selected row
+            int id=Integer.parseInt((tableModel.getValueAt(modelRow,0).toString()));
+            //Get updated values from input field
+            String title=txtTitle.getText();
+            String author=txtAuthor.getText();
+            String isbn=txtIsbn.getText();
+            //Call DAO to update book in database
+            BookDAO dao = new BookDAO();
+            boolean success = dao.updateBook(id, title, author, isbn);
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Book updated successfully");
+                //Refresh table data after update
+                loadBooks();
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to update book");
+            }
+        });
     }
 
     private void buildCenterPanel() {
@@ -167,6 +197,15 @@ public class ManageBooksFrame extends JFrame {
 
             // Close the current window
             this.dispose();
+        });
+        bookTable.getSelectionModel().addListSelectionListener(e ->{
+            int selectedRow=bookTable.getSelectedRow();
+            if(selectedRow!=-1){
+                int modelRow= bookTable.convertRowIndexToModel(selectedRow);
+                txtTitle.setText(tableModel.getValueAt(modelRow,1).toString());
+                txtAuthor.setText(tableModel.getValueAt(modelRow, 2).toString());
+                txtIsbn.setText(tableModel.getValueAt(modelRow, 3).toString());
+            }
         });
     }
 

@@ -101,12 +101,17 @@ public class ManageBooksFrame extends JFrame {
             }
 
         });
+
+        //Handle Delete button click event
+        //Deletes selected book from database and refreshes the table
         btnDelete.addActionListener(e->{
+            //Get selected row from table
             int selectedRow=bookTable.getSelectedRow();
             if(selectedRow==-1){
                 JOptionPane.showMessageDialog(this,"Please select s book to delete");
                 return;
             }
+            //Ask user for confirmation before deleting
             int confirm = JOptionPane.showConfirmDialog(
                     this,
                     "Are you sure you want to delete this book?",
@@ -116,12 +121,16 @@ public class ManageBooksFrame extends JFrame {
             if (confirm != JOptionPane.YES_OPTION) {
                 return;
         }
+            //Convert view index to model index (important for correct row)
             int modelRow = bookTable.convertRowIndexToModel(selectedRow);
+            //Get book ID from selected row
             int id=Integer.parseInt(tableModel.getValueAt(modelRow,0).toString());
+            //Call DAO to delete book from database
             BookDAO dao=new BookDAO();
             boolean success=dao.deleteBook(id);
             if(success) {
                 JOptionPane.showMessageDialog(this, "Book deleted successfully");
+                //Refresh table data after deletion
                 loadBooks();
             }else{
                 JOptionPane.showMessageDialog(this,"Failed to delete book");

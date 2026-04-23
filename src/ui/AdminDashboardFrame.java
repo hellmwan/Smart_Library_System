@@ -35,12 +35,10 @@ public class AdminDashboardFrame extends JFrame {
         // Admin görevleri için butonlar
         JButton btnHome = createMenuButton("🏠 Admin Overview");
         JButton btnPersonnel = createMenuButton("🧑‍💼 Manage Personnel");
-        JButton btnSettings = createMenuButton("⚙️ System Settings");
         JButton btnLogout = createMenuButton("🚪 Logout");
 
         sidebar.add(btnHome);
         sidebar.add(btnPersonnel);
-        sidebar.add(btnSettings);
         sidebar.add(btnLogout);
 
         add(sidebar, BorderLayout.WEST);
@@ -55,14 +53,12 @@ public class AdminDashboardFrame extends JFrame {
         // Panelleri ekle
         mainContentPanel.add(createPlaceholderPanel("ADMIN OVERVIEW", Color.WHITE), "HOME");
         mainContentPanel.add(new ManagePersonnelFrame(), "PERSONNEL");
-        mainContentPanel.add(createPlaceholderPanel("SYSTEM SETTINGS", Color.WHITE), "SETTINGS");
 
         add(mainContentPanel, BorderLayout.CENTER);
 
         // --- 3. EVENT LISTENERS ---
         btnHome.addActionListener(e -> { switchTab("HOME"); setActiveButton(btnHome); });
         btnPersonnel.addActionListener(e -> { switchTab("PERSONNEL"); setActiveButton(btnPersonnel); });
-        btnSettings.addActionListener(e -> { switchTab("SETTINGS"); setActiveButton(btnSettings); });
 
         btnLogout.addActionListener(e -> {
             new LoginFrame().setVisible(true);

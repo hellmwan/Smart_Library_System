@@ -20,13 +20,12 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Using BorderLayout for the main structure
+        // Main layout
         setLayout(new BorderLayout());
 
         // --- 1. SIDEBAR SETUP (KOYU ZEYTİN YEŞİLİ: #556b2f) ---
         JPanel sidebar = new JPanel();
         sidebar.setPreferredSize(new Dimension(250, getHeight()));
-
         sidebar.setBackground(Color.decode("#556b2f"));
         sidebar.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 15));
 
@@ -36,22 +35,24 @@ public class MainFrame extends JFrame {
         menuTitle.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         sidebar.add(menuTitle);
 
-        // Define Navigation Buttons (Personel yetkilerine göre güncellendi)
+        // Define Navigation Buttons
         JButton btnHome = createMenuButton("🏠 Overview");
         JButton btnBooks = createMenuButton("📚 Manage Books");
-        JButton btnMembers = createMenuButton("👥 Manage Members"); // Personel yerine Üyeler geldi
+        JButton btnMembers = createMenuButton("👥 Manage Members");
         JButton btnLoans = createMenuButton("🔄 Issue / Return");
         JButton btnReports = createMenuButton("📊 Reports");
+        JButton btnLogout = createMenuButton("🚪 Logout"); // Yeni Logout butonu
 
         sidebar.add(btnHome);
         sidebar.add(btnBooks);
         sidebar.add(btnMembers);
         sidebar.add(btnLoans);
         sidebar.add(btnReports);
+        sidebar.add(btnLogout); // Sidebar'a eklendi
 
         add(sidebar, BorderLayout.WEST);
 
-        // Varsayılan olarak ilk açılışta "Overview (Home)" butonunu aktif/basılı hale getir
+        // Varsayılan olarak ilk açılışta "Overview" aktif olsun
         setActiveButton(btnHome);
 
         // --- 2. CARDLAYOUT CONTENT AREA ---
@@ -60,10 +61,8 @@ public class MainFrame extends JFrame {
 
         // Panelleri CardLayout'a ekliyoruz
         mainContentPanel.add(createPlaceholderPanel("WELCOME TO SMART LIBRARY", Color.WHITE), "HOME");
-
-        // NOT: İleride bu sınıfları extends JFrame yerine extends JPanel yapman gerekecek.
         mainContentPanel.add(new ManageBooksFrame(), "BOOKS");
-        mainContentPanel.add(new ManageMembersFrame(), "MEMBERS"); // ManagePersonnelFrame yerine ManageMembersFrame
+        mainContentPanel.add(new ManageMembersFrame(), "MEMBERS");
         mainContentPanel.add(new IssueReturnFrame(), "LOANS");
         mainContentPanel.add(new ReportsFrame(), "REPORTS");
 
@@ -75,17 +74,30 @@ public class MainFrame extends JFrame {
         btnMembers.addActionListener(e -> { switchTab("MEMBERS"); setActiveButton(btnMembers); });
         btnLoans.addActionListener(e -> { switchTab("LOANS"); setActiveButton(btnLoans); });
         btnReports.addActionListener(e -> { switchTab("REPORTS"); setActiveButton(btnReports); });
+
+        // Logout İşlemi
+        btnLogout.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to logout?",
+                    "Logout Confirmation",
+                    JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                new LoginFrame().setVisible(true); // Login ekranına dön
+                this.dispose(); // Mevcut dashboard'u kapat
+            }
+        });
     }
 
     /**
-     * Tıklanan butonu krem rengi yapar (yazısını siyahlaştırır),
-     * diğerlerini orijinal zeytin yeşiline (ve beyaz yazıya) döndürür.
+     * Tıklanan butonu aktif stile sokar.
      */
     private void setActiveButton(JButton activeBtn) {
         for (JButton btn : menuButtons) {
             btn.setBackground(Color.decode("#556b2f"));
             btn.setForeground(Color.WHITE);
         }
+        // Aktif buton Krem (#ffe7ba) ve yazı Siyah
         activeBtn.setBackground(Color.decode("#ffe7ba"));
         activeBtn.setForeground(Color.BLACK);
     }
@@ -99,11 +111,10 @@ public class MainFrame extends JFrame {
     private JPanel createPlaceholderPanel(String text, Color bgColor) {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(bgColor);
-
         JLabel label = new JLabel(text);
         label.setFont(new Font("Arial", Font.BOLD, 30));
+        label.setForeground(Color.decode("#556b2f"));
         panel.add(label);
-
         return panel;
     }
 
@@ -111,7 +122,6 @@ public class MainFrame extends JFrame {
         JButton btn = new JButton(text);
         btn.setPreferredSize(new Dimension(220, 45));
         btn.setFont(new Font("Arial", Font.BOLD, 15));
-
         btn.setBackground(Color.decode("#556b2f"));
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);

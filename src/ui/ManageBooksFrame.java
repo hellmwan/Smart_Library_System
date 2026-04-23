@@ -101,6 +101,34 @@ public class ManageBooksFrame extends JFrame {
             }
 
         });
+        btnDelete.addActionListener(e->{
+            int selectedRow=bookTable.getSelectedRow();
+            if(selectedRow==-1){
+                JOptionPane.showMessageDialog(this,"Please select s book to delete");
+                return;
+            }
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to delete this book?",
+                    "Confirm Delete",
+                    JOptionPane.YES_NO_OPTION
+            );
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+        }
+            int modelRow = bookTable.convertRowIndexToModel(selectedRow);
+            int id=Integer.parseInt(tableModel.getValueAt(modelRow,0).toString());
+            BookDAO dao=new BookDAO();
+            boolean success=dao.deleteBook(id);
+            if(success) {
+                JOptionPane.showMessageDialog(this, "Book deleted successfully");
+                loadBooks();
+            }else{
+                JOptionPane.showMessageDialog(this,"Failed to delete book");
+
+            }
+
+        });
     }
 
     private void buildCenterPanel() {

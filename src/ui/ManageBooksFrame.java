@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import javax.swing.JOptionPane;
+import service.BookService;
 
 public class ManageBooksFrame extends JFrame {
 
@@ -12,6 +13,7 @@ public class ManageBooksFrame extends JFrame {
     private JButton btnAdd, btnUpdate, btnDelete, btnBack;
     private JTable bookTable;
     private DefaultTableModel tableModel;
+    private BookService service= new BookService();
 
     public ManageBooksFrame() {
         // Set the window title
@@ -88,8 +90,9 @@ public class ManageBooksFrame extends JFrame {
             String title=txtTitle.getText();
             String author=txtAuthor.getText();
             String isbn=txtIsbn.getText();
-            BookDAO dao=new BookDAO();
-            boolean success=dao.addBook(title,author,isbn);
+            //BookDAO dao=new BookDAO();
+            //boolean success=dao.addBook(title,author,isbn);
+            boolean success = service.addBook(title, author, isbn);
             if(success){
                 JOptionPane.showMessageDialog(this,"Book added successfully");
                 loadBooks();

@@ -1,8 +1,9 @@
 package ui;
-
+import data.BookDAO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import javax.swing.JOptionPane;
 
 public class ManageBooksFrame extends JFrame {
 
@@ -34,6 +35,7 @@ public class ManageBooksFrame extends JFrame {
         // Call methods to build the interface
         buildTopPanel();    // Top panel for input fields
         buildCenterPanel(); // Center panel for the data table
+        loadBooks();
     }
 
     private void buildTopPanel() {
@@ -79,6 +81,26 @@ public class ManageBooksFrame extends JFrame {
 
         // Add this top panel to the North (top) area of the screen
         add(topPanel, BorderLayout.NORTH);
+
+        //Handle add book button click event
+        //Gets user input, inserts into database,refreshes table and clears fields
+        btnAdd.addActionListener(e ->{
+            String title=txtTitle.getText();
+            String author=txtAuthor.getText();
+            String isbn=txtIsbn.getText();
+            BookDAO dao=new BookDAO();
+            boolean success=dao.addBook(title,author,isbn);
+            if(success){
+                JOptionPane.showMessageDialog(this,"Book added successfully");
+                loadBooks();
+                txtTitle.setText("");
+                txtAuthor.setText("");
+                txtIsbn.setText("");
+            } else{
+                JOptionPane.showMessageDialog(this,"Failed to add book");
+            }
+
+        });
     }
 
     private void buildCenterPanel() {
@@ -90,8 +112,8 @@ public class ManageBooksFrame extends JFrame {
         bookTable = new JTable(tableModel);
 
         // Add 2 sample rows (These will come from the database later)
-        tableModel.addRow(new Object[]{"1", "Java Programming", "John Doe", "978-1234", "Available"});
-        tableModel.addRow(new Object[]{"2", "Data Structures", "Jane Smith", "978-5678", "Loaned"});
+        //tableModel.addRow(new Object[]{"1", "Java Programming", "John Doe", "978-1234", "Available"}); --->//Removed sample data, using database instead
+        //tableModel.addRow(new Object[]{"2", "Data Structures", "Jane Smith", "978-5678", "Loaned"});   --->//Removed sample data, using database instead
 
         // Put the table inside a scrollable pane to handle many rows
         JScrollPane scrollPane = new JScrollPane(bookTable);
@@ -114,5 +136,13 @@ public class ManageBooksFrame extends JFrame {
     public static void main(String[] args) {
         // Start the application and show the frame
         new ManageBooksFrame().setVisible(true);
+    }
+    //Loads all books from database and displays them in the table
+    public void loadBooks(){
+        BookDAO dao= new BookDAO();
+        tableModel.setRowCount(0);
+        for(String[]book:dao.getAllBooks()){
+            tableModel.addRow(book);
+        }
     }
 }

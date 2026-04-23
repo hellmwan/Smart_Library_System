@@ -2,6 +2,8 @@ package ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LoginFrame extends JFrame {
 
@@ -10,25 +12,29 @@ public class LoginFrame extends JFrame {
     private JButton loginButton;
     private Image backgroundImage;
 
+    // --- ÖNEMLİ: Admin'in eklediği personellerin tutulduğu ortak liste ---
+    public static List<String[]> registeredPersonnel = new ArrayList<>();
+
+    static {
+        // Varsayılan kütüphaneci hesabı
+        registeredPersonnel.add(new String[]{"Default Librarian", "lib", "lib123"});
+    }
+
     public LoginFrame() {
         setTitle("Smart Library - Login");
         setSize(400, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // --- LOAD THE BACKGROUND IMAGE ---
-        backgroundImage = new ImageIcon("src/background.png").getImage();
+        backgroundImage = new ImageIcon("src/xyz.jpeg").getImage();
 
-        // --- CREATE A CUSTOM PANEL WITH OPACITY CONTROL ---
         JPanel backgroundPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g.create();
-
-                float opacity = 0.5f; // Saydamlık ayarı
+                float opacity = 0.75f;
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-
                 if (backgroundImage != null) {
                     g2d.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
                 }
@@ -51,9 +57,7 @@ public class LoginFrame extends JFrame {
         usernameField = new JTextField();
         usernameField.setBounds(50, 220, 300, 30);
         usernameField.setOpaque(false);
-        usernameField.setForeground(Color.BLACK);
-        usernameField.setCaretColor(Color.BLACK);
-        usernameField.setBorder(BorderFactory.createMatteBorder(0, 0, 3, 0, Color.BLACK));
+        usernameField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
         add(usernameField);
 
         JLabel passLabel = new JLabel("Password");
@@ -65,29 +69,47 @@ public class LoginFrame extends JFrame {
         passwordField = new JPasswordField();
         passwordField.setBounds(50, 300, 300, 30);
         passwordField.setOpaque(false);
-        passwordField.setForeground(Color.BLACK);
-        passwordField.setCaretColor(Color.BLACK);
-        passwordField.setBorder(BorderFactory.createMatteBorder(0, 0, 3, 0, Color.BLACK));
+        passwordField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
         add(passwordField);
 
         loginButton = new JButton("LOG IN");
-        loginButton.setBounds(50, 380, 300, 45); // Sadece Login butonu kaldı
+        loginButton.setBounds(50, 390, 300, 45);
         loginButton.setBackground(new Color(74, 144, 226));
         loginButton.setForeground(Color.WHITE);
         loginButton.setFont(new Font("Arial", Font.BOLD, 14));
         loginButton.setFocusPainted(false);
         add(loginButton);
 
-        // --- GİRİŞ MANTIĞI ---
         loginButton.addActionListener(e -> {
-            // Şimdilik giriş yapan herkesi doğrudan Personel/Admin paneline (MainFrame) atıyoruz.
-            // İleride "admin" ve "personel" yetki ayrımını veritabanı bağladığımızda buraya ekleyeceğiz.
-            new MainFrame().setVisible(true);
-            this.dispose();
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+
+            // 1. Admin Kontrolü
+            if (username.equals("admin") && password.equals("admin123")) {
+                new AdminDashboardFrame().setVisible(true);
+                this.dispose();
+                return;
+            }
+
+            // 2. Dinamik Personel Kontrolü (Admin'in ekledikleri dahil)
+            boolean accessGranted = false;
+            for (String[] personnel : registeredPersonnel) {
+                // personnel[1] = username, personnel[2] = password
+                if (personnel[1].equals(username) && personnel[2].equals(password)) {
+                    new MainFrame("LIBRARIAN").setVisible(true);
+                    this.dispose();
+                    accessGranted = true;
+                    break;
+                }
+            }
+
+            if (!accessGranted) {
+                JOptionPane.showMessageDialog(this, "Giriş izniniz bulunmamaktadır!", "Yetki Hatası", JOptionPane.WARNING_MESSAGE);
+            }
         });
     }
 
     public static void main(String[] args) {
-        new LoginFrame().setVisible(true);
+        SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
     }
 }

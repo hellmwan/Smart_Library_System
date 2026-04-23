@@ -8,79 +8,121 @@ public class LoginFrame extends JFrame {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton loginButton;
+    private JButton signUpButton;
+    private Image backgroundImage;
 
     public LoginFrame() {
-        // Set the window title
+        // Set up window properties
         setTitle("Smart Library - Login");
-
-        // Define the width and height of the frame
-        setSize(400, 500);
-
-        // Close the application when the user clicks the 'X' button
+        setSize(400, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // Center the window on the screen
         setLocationRelativeTo(null);
 
-        // Use absolute positioning for components
-        setLayout(null);
+        // --- LOAD THE BACKGROUND IMAGE ---
+        backgroundImage = new ImageIcon("src/background.png").getImage();
 
-        // Change the background color to white
-        getContentPane().setBackground(Color.WHITE);
+        // --- CREATE A CUSTOM PANEL WITH OPACITY CONTROL ---
+        // --- CREATE A CUSTOM PANEL WITH OPACITY CONTROL ---
+        JPanel backgroundPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+
+                // 1. KRİTİK NOKTA: Orijinal fırçanın bir kopyasını oluşturuyoruz
+                Graphics2D g2d = (Graphics2D) g.create();
+
+                // Sadece resim için geçerli olacak saydamlık ayarı (Örn: %50 saydam)
+                float opacity = 0.75f;
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+
+                // Resmi bu "kopya ve saydam" fırçayla çiziyoruz
+                if (backgroundImage != null) {
+                    g2d.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+                }
+
+                // 2. KRİTİK NOKTA: Saydam fırçayı çöpe atıyoruz!
+                // Böylece orijinal fırça %100 opak (net) olarak kalıyor
+                // ve butonlar, yazılar, kutucuklar capcanlı çiziliyor.
+                g2d.dispose();
+            }
+        };
+        backgroundPanel.setLayout(null);
+        setContentPane(backgroundPanel);
 
         buildUI();
     }
 
     private void buildUI() {
-        // Create and customize the title text
-        JLabel titleLabel = new JLabel("Welcome Back!");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        titleLabel.setBounds(100, 50, 200, 40);
-        add(titleLabel);
-
-        // Add a label for the username input
-        JLabel userLabel = new JLabel("Username");
-        userLabel.setBounds(50, 150, 100, 20);
+        // --- USERNAME SECTION (Updated to Black Text) ---
+        JLabel userLabel = new JLabel("Username / E-mail");
+        userLabel.setBounds(50, 200, 300, 20);
+        userLabel.setForeground(Color.BLACK); // Set text to black for better contrast
+        userLabel.setFont(new Font("Arial", Font.BOLD, 14));
         add(userLabel);
 
-        // Create the text field where the user will type their username
         usernameField = new JTextField();
-        usernameField.setBounds(50, 170, 300, 40);
+        usernameField.setBounds(50, 220, 300, 30);
+        usernameField.setOpaque(false);
+        usernameField.setForeground(Color.BLACK); // User input is now black
+        usernameField.setCaretColor(Color.BLACK);
+        // White underline to stand out against the faded background
+        usernameField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
         add(usernameField);
 
-        // Add a label for the password input
+        // --- PASSWORD SECTION (Updated to Black Text) ---
         JLabel passLabel = new JLabel("Password");
-        passLabel.setBounds(50, 230, 100, 20);
+        passLabel.setBounds(50, 280, 300, 20);
+        passLabel.setForeground(Color.BLACK);
+        passLabel.setFont(new Font("Arial", Font.BOLD, 14));
         add(passLabel);
 
-        // Create a secure text field for the password
         passwordField = new JPasswordField();
-        passwordField.setBounds(50, 250, 300, 40);
+        passwordField.setBounds(50, 300, 300, 30);
+        passwordField.setOpaque(false);
+        passwordField.setForeground(Color.BLACK);
+        passwordField.setCaretColor(Color.BLACK);
+        passwordField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
         add(passwordField);
 
-        // Create the login button and design its appearance
-        loginButton = new JButton("LOGIN");
-        loginButton.setBounds(50, 330, 300, 45);
-        loginButton.setBackground(new Color(52, 152, 219)); // Blue background
-        loginButton.setForeground(Color.WHITE); // White text color
+        // --- LOG IN BUTTON ---
+        loginButton = new JButton("LOG IN");
+        loginButton.setBounds(50, 380, 300, 45);
+        loginButton.setBackground(new Color(74, 144, 226));
+        loginButton.setForeground(Color.WHITE);
         loginButton.setFont(new Font("Arial", Font.BOLD, 14));
-        loginButton.setFocusPainted(false); // Remove the border when clicked
+        loginButton.setFocusPainted(false);
         add(loginButton);
 
-        // Handle the button click event
-        loginButton.addActionListener(e -> {
-            // Open the dashboard screen
-            MainFrame dashboard = new MainFrame();
-            dashboard.setVisible(true);
+        // --- SIGN UP BUTTON ---
+        signUpButton = new JButton("SIGN UP");
+        signUpButton.setBounds(50, 440, 300, 45);
+        signUpButton.setBackground(new Color(72, 191, 206));
+        signUpButton.setForeground(Color.WHITE);
+        signUpButton.setFont(new Font("Arial", Font.BOLD, 14));
+        signUpButton.setFocusPainted(false);
+        add(signUpButton);
 
-            // Close the current login window
+        // --- BUTTON ACTIONS ---
+        loginButton.addActionListener(e -> {
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+
+            if (username.equals("admin") && password.equals("admin123")) {
+                new MainFrame().setVisible(true);
+                this.dispose();
+            } else {
+                new StudentDashboardFrame(username).setVisible(true);
+                this.dispose();
+            }
+        });
+
+        signUpButton.addActionListener(e -> {
+            new RegisterFrame().setVisible(true);
             this.dispose();
         });
     }
 
     public static void main(String[] args) {
-        // Start the application and show the login frame
-        LoginFrame frame = new LoginFrame();
-        frame.setVisible(true);
+        new LoginFrame().setVisible(true);
     }
 }

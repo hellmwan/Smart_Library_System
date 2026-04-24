@@ -1,0 +1,14 @@
+1;Java Programming;John Doe;978-1-23456-789-0;Available
+2;Data Structures;Jane Smith;978-1-23456-790-6;Loaned
+3;Database Systems;Robert Wilson;978-1-23456-791-3;Loaned
+4;Algorithms;Thomas Cormen;978-1-23456-792-0;Available
+5;Suç ve Ceza;Fyodor Dostoyevski;978-1-23456-793-7;Loaned
+6;Nutuk;Mustafa Kemal Atatürk;978-1-23456-794-4;Available
+7;Sapiens;Yuval Noah Harari;978-1-23456-795-1;Loaned
+8;Clean Code;Robert C. Martin;978-1-23456-796-8;Available
+9;Test Book;Test Author;978-1-23456-797-5;Available
+10;Another Book;Author X;978-1-23456-798-2;Available
+11;Sample Book;Author Y;978-1-23456-799-9;Available
+12;Demo Book;Author Z;978-1-23456-800-5;Loaned
+13;Java Advanced;John Doe;978-1-23456-801-2;Available
+15;Java Programming 2;John Doe;978-1-23456-789-2;Available

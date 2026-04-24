@@ -1,0 +1,17 @@
+# --- Yapilandirilmis ciktilar (Derlenmis Kodlar) ---
+*.class
+out/
+bin/
+
+# --- IntelliJ IDEA Ayarlari ---
+.idea/
+*.iml
+
+# --- Eclipse Ayarlari ---
+.metadata/
+.classpath
+.project
+.settings/
+
+# --- Runtime ile uretilen dosyalar ---
+data/loans.txt

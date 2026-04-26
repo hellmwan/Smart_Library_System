@@ -12,32 +12,35 @@ import java.sql.Statement;
 import java.util.stream.Collectors;
 
 /**
- * Central database access point.
- * <p>
- * Uses a single shared {@link Connection} (singleton pattern) to a local
- * SQLite file stored at <code>data/library.db</code>. The database file
- * and folder are created automatically on first run.
- * <p>
- * DAO classes should call {@link #getConnection()} for every operation.
- * Call {@link #initializeDatabase()} once at application startup.
+ * Bu projede ana veri saklama text dosyalarinda (data/*.txt) yapiliyor.
+ * Bu sinif ileride veritabanina gecis icin hazirlanmis bir altyapidir.
+ * Su anki "lib/sqlite-jdbc-3.51.3.0.jar" kutuphanesini kullanir
+ * Singleton mantigi: Tek bir Connection nesnesi acilir, butun program onu paylasir.
+ * Tekrar tekrar baglanmak performans kaybi olur.
  */
 public final class DBConnection {
 
-    /**
-     * Default on-disk SQLite file. Tests can override it by setting
-     * the system property {@code library.db.path} — use the special
-     * value {@code ":memory:"} to get a throw-away in-memory database.
-     */
-    private static final String DEFAULT_DB_FILE = "data/library.db";
-    private static final String PROPERTY_KEY    = "library.db.path";
+    // --- Sabitler ---
+    private static final String DEFAULT_DB_FILE = "data/library.db";   // Varsayilan db dosyasi
+    private static final String PROPERTY_KEY    = "library.db.path";   // Sistem ozelligi anahtari (override icin)
 
-    private static Connection connection;
-    private static String      activeUrl;
+    // --- Statik durum (tum siniflar paylasir) ---
+    private static Connection connection;   // Tek baglanti
+    private static String      activeUrl;   // Aktif jdbc URL'i (debug icin)
 
     private DBConnection() {
-        // utility class - no instances
+        // Utility sinifindan nesne uretilmesin
     }
 
+
+    /**
+     * Kullanilacak JDBC URL'sini belirler.
+     *
+     * Mantik:
+     *  1. Eger -Dlibrary.db.path=... ile bir yol verilmisse onu kullan
+     *  2. Bu yol ":memory:" ise gecici (RAM'de) veritabani kullan (testler icin)
+     *  3. Hicbir sey verilmediyse varsayilan dosyaya bagla
+     */
     private static String resolveUrl() {
         String override = System.getProperty(PROPERTY_KEY);
         if (override == null || override.isBlank()) {
@@ -49,18 +52,18 @@ public final class DBConnection {
         return "jdbc:sqlite:" + override.trim();
     }
 
+
     /**
-     * Returns the shared connection, opening it if necessary.
-     * Thread-safe.
+     * Aktif Connection'i doner. Yoksa olusturur.
+     * "synchronized" -> ayni anda iki thread cagirsa bile guvenli.
      */
     public static synchronized Connection getConnection() throws SQLException {
+        // Baglanti yoksa veya kapanmissa yenisini ac
         if (connection == null || connection.isClosed()) {
             activeUrl = resolveUrl();
 
-            // For on-disk databases, make sure the parent directory exists.
-            // Skip this for in-memory databases (":memory:" has no file).
+            // Eger gercek dosya kullanilacaksa data/ klasorunu olustur (yoksa)
             if (!activeUrl.contains(":memory:")) {
-                // Strip "jdbc:sqlite:" prefix to get the raw path, then find its parent.
                 String path = activeUrl.substring("jdbc:sqlite:".length());
                 File dbFile = new File(path);
                 File parent = dbFile.getAbsoluteFile().getParentFile();
@@ -68,9 +71,11 @@ public final class DBConnection {
                     throw new SQLException("Could not create directory: " + parent.getAbsolutePath());
                 }
             }
+
+            // Asil baglantiyi ac
             connection = DriverManager.getConnection(activeUrl);
 
-            // SQLite does NOT enforce foreign keys by default. Turn them on.
+            // SQLite varsayilan olarak foreign key zorlamiyor; biz aciyoruz
             try (Statement st = connection.createStatement()) {
                 st.execute("PRAGMA foreign_keys = ON;");
             }
@@ -78,21 +83,19 @@ public final class DBConnection {
         return connection;
     }
 
+
     /**
-     * Executes schema.sql (from resources) to create tables if they
-     * do not already exist. Safe to call on every application start.
+     * Veritabani semasini kurar (tablolari olusturur).
+     * "/schema.sql" classpath'inden okunur ve calistirilir.
      */
     public static void initializeDatabase() throws SQLException {
         runScript("/schema.sql");
     }
 
+
     /**
-     * Populates the database with demo data from seed.sql
-     * <b>only if the library is empty</b> (no books and no members).
-     * This lets a fresh install come up with something to show off,
-     * without wiping real data on subsequent restarts.
-     *
-     * @return true if seed data was loaded, false if skipped.
+     * Eger veritabani bossa "/seed.sql"den ornek veri yukler.
+     * @return seed yuklendiyse true, doluysa false
      */
     public static boolean loadSeedDataIfEmpty() throws SQLException {
         if (!isEmptyDatabase()) return false;
@@ -100,41 +103,46 @@ public final class DBConnection {
         return true;
     }
 
+    /** books ve members tablolari boş mu? */
     private static boolean isEmptyDatabase() throws SQLException {
         Connection conn = getConnection();
         try (Statement st = conn.createStatement()) {
-            // If either table has rows already, we consider the DB "populated"
-            // and leave it alone.
             int books   = countRows(st, "SELECT COUNT(*) FROM books");
             int members = countRows(st, "SELECT COUNT(*) FROM members");
             return books == 0 && members == 0;
         }
     }
 
+    /** SELECT COUNT(*) sonucunu int olarak doner. */
     private static int countRows(Statement st, String sql) throws SQLException {
         try (var rs = st.executeQuery(sql)) {
             return rs.next() ? rs.getInt(1) : 0;
         }
     }
 
+
     /**
-     * Reads a SQL script from the classpath and runs each statement in it.
-     * Lines beginning with {@code --} are treated as comments and stripped
-     * before the script is split on {@code ;}.
+     * Bir SQL dosyasini classpath'ten okuyup ; ile ayrilmis komutlari calistirir.
+     *
+     * Adimlar:
+     *  1. Dosyayi metin olarak yukle
+     *  2. -- ile baslayan tam satir yorumlarini ele
+     *  3. ; ile boluerek her komutu execute et
      */
     private static void runScript(String resourcePath) throws SQLException {
         String script = loadResource(resourcePath);
         Connection conn = getConnection();
         try (Statement stmt = conn.createStatement()) {
-            // Strip comment lines so they don't produce phantom empty statements
-            // when the script is split on ';'.
+
+            // Yorum satirlarini cikar
             StringBuilder cleaned = new StringBuilder();
             for (String line : script.split("\\R")) {
                 String trimmed = line.stripLeading();
-                if (trimmed.startsWith("--")) continue;   // full-line comment
+                if (trimmed.startsWith("--")) continue;   // tam satir yorum -> atla
                 cleaned.append(line).append('\n');
             }
 
+            // ; ile parcala ve her komutu calistir
             for (String raw : cleaned.toString().split(";")) {
                 String sql = raw.trim();
                 if (!sql.isEmpty()) {
@@ -144,6 +152,7 @@ public final class DBConnection {
         }
     }
 
+    /** Classpath uzerinden bir kaynak dosyasini metin olarak yukler. */
     private static String loadResource(String path) {
         try (InputStream is = DBConnection.class.getResourceAsStream(path)) {
             if (is == null) {
@@ -153,6 +162,7 @@ public final class DBConnection {
             }
             try (BufferedReader reader =
                          new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                // Tum satirlari okuyup \n ile birlestir
                 return reader.lines().collect(Collectors.joining("\n"));
             }
         } catch (Exception e) {
@@ -160,13 +170,17 @@ public final class DBConnection {
         }
     }
 
-    /** Closes the connection. Call on application shutdown. */
+
+    /**
+     * Veritabani baglantisini kapatir.
+     * Programdan cikarken cagirmak iyi pratiktir.
+     */
     public static synchronized void close() {
         if (connection != null) {
             try {
                 connection.close();
             } catch (SQLException ignored) {
-                /* closing silently */
+                // Kapatma hatasini yutuyoruz, programi durdurmayalim
             }
             connection = null;
         }

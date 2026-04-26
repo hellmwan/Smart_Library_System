@@ -1,16 +1,18 @@
 package util;
 
 /**
- * Unchecked exception thrown when user input fails validation.
- * <p>
- * The {@link #getMessage() message} is intentionally user-friendly:
- * the UI catches this exception and shows the message directly in
- * a {@code JOptionPane}, so messages should read like something a
- * user can act on ("E-mail address is not valid", not
- * "regex match failed at index 7").
+ * Validator sinifi yanlis bir veri gordugunde (ornegin gecersiz e-mail,
+ * bos isim vs.) bu istisnayi firlatir. UI tarafinda bunu yakalayip
+ * kullaniciya guzel bir hata mesaji gosteriyoruz.
+ * RuntimeException'dan kalitti, yani "checked" degil -> her metoda
+ * "throws" yazmak zorunda degiliz, daha rahat kullanim saglar.
  */
 public class ValidationException extends RuntimeException {
 
+    /**
+     * Hata mesaji ile yeni bir istisna olusturur.
+     * @param message kullaniciya gosterilecek hata aciklamasi
+     */
     public ValidationException(String message) {
         super(message);
     }
